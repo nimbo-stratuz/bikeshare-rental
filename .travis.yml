@@ -25,3 +25,7 @@ script:
 after_success:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - docker push "$DOCKER_IMAGE:$IMAGE_VERSION" && docker push "$DOCKER_IMAGE:latest"
+
+branches:
+  only:
+  - master

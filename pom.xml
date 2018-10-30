@@ -44,6 +44,11 @@
                 <artifactId>kumuluzee-rest-core</artifactId>
                 <version>${kumuluzee-rest.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.kumuluz.ee.discovery</groupId>
+                <artifactId>kumuluzee-discovery-etcd</artifactId>
+                <version>1.1.0</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.postgresql</groupId>
