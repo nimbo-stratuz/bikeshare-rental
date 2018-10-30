@@ -3,7 +3,6 @@
     <persistence-unit name="bikeshare-rental-jpa" transaction-type="RESOURCE_LOCAL">
         <non-jta-data-source>jdbc/BikeshareRentalDS</non-jta-data-source>
 
-        <class>si.nimbostratuz.bikeshare.models.entities.Bicycle</class>
         <class>si.nimbostratuz.bikeshare.models.entities.Rental</class>
 
         <properties>

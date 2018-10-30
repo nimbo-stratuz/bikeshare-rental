@@ -8,6 +8,9 @@ import java.util.Date;
 
 @Entity(name = "rental")
 @Data
+@NamedQueries({
+        @NamedQuery(name = "Rental.getAll", query = "SELECT r from rental r")
+})
 public class Rental {
 
     @Id
@@ -40,7 +43,6 @@ public class Rental {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @JoinColumn(name = "bicycle_id")
-    @ManyToOne(targetEntity = Bicycle.class, optional = false)
-    private Bicycle bicycle;
+    @Column(name = "bicycle_id", nullable = false)
+    private Integer bicycleId;
 }

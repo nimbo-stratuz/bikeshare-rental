@@ -4,12 +4,12 @@ kumuluzee:
     name: dev
   version: 1.0.0
   server:
-    base-url: http://localhost:8080
+    base-url: http://localhost:8081
     http:
-      port: 8080
+      port: 8081
   datasources:
   - jndi-name: jdbc/BikeshareRentalDS
-    connection-url: jdbc:postgresql://localhost:5432/bikeshare
+    connection-url: jdbc:postgresql://localhost:5433/bikeshare-rental
     username: postgres
     password: postgres
     max-pool-size: 20
