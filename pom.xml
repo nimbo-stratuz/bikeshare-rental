@@ -27,6 +27,8 @@
         <postgresql.version>42.2.5</postgresql.version>
 
         <lombok.version>1.16.22</lombok.version>
+        <kumuluzee-config.version>1.1.0</kumuluzee-config.version>
+        <kumuluzee-health.version>1.0.0</kumuluzee-health.version>
     </properties>
 
     <dependencyManagement>
@@ -49,7 +51,16 @@
                 <artifactId>kumuluzee-discovery-etcd</artifactId>
                 <version>1.1.0</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.kumuluz.ee.config</groupId>
+                <artifactId>kumuluzee-config-etcd</artifactId>
+                <version>${kumuluzee-config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kumuluz.ee.health</groupId>
+                <artifactId>kumuluzee-health</artifactId>
+                <version>${kumuluzee-health.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>

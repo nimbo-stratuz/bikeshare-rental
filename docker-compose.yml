@@ -1,3 +1,5 @@
+
+
 version: '3.7'
 
 services:
@@ -10,3 +12,22 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: bikeshare-rental
+
+  etcd:
+    image: quay.io/coreos/etcd
+    ports:
+    - 2380:2379
+    command: >-
+      /usr/local/bin/etcd
+      -name node1
+      -advertise-client-urls http://etcd:2380
+      -listen-client-urls http://0.0.0.0:2380
+      -initial-advertise-peer-urls http://etcd:2379
+      -listen-peer-urls http://0.0.0.0:2379
+      -initial-cluster node1=http://etcd:2379
+      -cors="*"
+
+networks:
+  default:
+    external:
+      name: bikeshare
