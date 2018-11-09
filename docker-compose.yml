@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  db-pgsql:
+  dbpgsql:
     image: postgres:alpine
     restart: always
     ports:
@@ -10,22 +10,28 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: bikeshare-rental
+    networks:
+      - bikeshare
   bikeshare-rental:
-    image: nimbostratuz/bikeshare-rental:latest
+    build: .
     ports:
+#       left is outside, right is inside container
     - 8081:8080
     environment:
-      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://db-pgsql:5433/bikeshare-rental
-#      KUMULUZEE_DATASOURCES0_CONNECTIONURL=jdbc:postgresql://bikeshare-rental.db.bikeshare:5433/bikeshare-rental
+#      Overrides config file
+#      PORT: 8080
+      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://dbpgsql:5432/bikeshare-rental
       KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
       KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
     depends_on:
-    - db-pgsql
+    - dbpgsql
     - etcd
+    networks:
+    - bikeshare
   etcd:
     image: quay.io/coreos/etcd:latest
     ports:
-    - "2379:2379"
+    - 2379:2379
     command: >-
       /usr/local/bin/etcd
       -name node1
@@ -35,8 +41,11 @@ services:
       -listen-peer-urls http://0.0.0.0:2380
       -initial-cluster node1=http://etcd:2380
       -cors="*"
+    networks:
+    - bikeshare
 
 networks:
-  default:
-    external:
-      name: bikeshare
+  bikeshare:
+#  default:
+#    external:
+#  name: bikeshare

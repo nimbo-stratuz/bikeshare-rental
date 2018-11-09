@@ -20,7 +20,7 @@ Build the image and start the microservice:
 mvn clean package
 docker build -t bikeshare-rental:snapshot .
 docker run  --name bikeshare-rental \
-            -p 8081:8080 \
+            -p 8080:8080 \
             --network bikeshare \
             -e KUMULUZEE_DATASOURCES0_CONNECTIONURL=jdbc:postgresql://bikeshare-rental.db.bikeshare:5433/bikeshare-rental \
             --rm \
