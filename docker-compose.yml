@@ -1,33 +1,62 @@
 version: '3.7'
 
 services:
-  dbpgsql:
+  bikeshare-rental-db:
     image: postgres:alpine
     restart: always
     ports:
-    - 5433:5432
+    - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: bikeshare-rental
     networks:
       - bikeshare
+
+  bikeshare-catalogue-db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bikeshare-catalogue
+    networks:
+    - bikeshare
+
+  bikeshare-catalogue:
+    image: nimbostratuz/bikeshare-catalogue:0.2
+    ports:
+    - 8080:8080
+    environment:
+      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-catalogue-db:5432/bikeshare-catalogue
+      KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd:2379
+    depends_on:
+    - bikeshare-catalogue-db
+    - etcd
+    networks:
+    - bikeshare
+
   bikeshare-rental:
-    build: .
+    image: nimbostratuz/bikeshare-rental:latest
     ports:
 #       left is outside, right is inside container
     - 8081:8080
     environment:
 #      Overrides config file
 #      PORT: 8080
-      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://dbpgsql:5432/bikeshare-rental
+      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-rental-db:5432/bikeshare-rental
       KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
       KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd:2379
     depends_on:
-    - dbpgsql
+    - bikeshare-rental-db
     - etcd
     networks:
     - bikeshare
+
+
   etcd:
     image: quay.io/coreos/etcd:latest
     ports:
