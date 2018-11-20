@@ -22,8 +22,6 @@ services:
     environment:
       KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-rental.db:5432/bikeshare-rental
       KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
-      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
-      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd:2379/health
     depends_on:
     - bikeshare-rental.db
     - etcd
@@ -45,6 +43,6 @@ services:
       -cors="*"
 #    networks:
 #    - bikeshare
-
+#
 #networks:
 #  bikeshare:
