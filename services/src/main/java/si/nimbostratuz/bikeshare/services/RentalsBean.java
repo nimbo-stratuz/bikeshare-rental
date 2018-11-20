@@ -3,8 +3,10 @@ package si.nimbostratuz.bikeshare.services;
 import lombok.extern.java.Log;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
+import si.nimbostratuz.bikeshare.services.configuration.AppProperties;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
@@ -16,8 +18,12 @@ import java.util.List;
 @ApplicationScoped
 public class RentalsBean extends EntityBean<Rental> {
 
-    public List<Rental> getAll() {
 
+    @Inject
+    private AppProperties appProperties;
+
+    public List<Rental> getAll() {
+        log.info("external services enabled: " + appProperties.isExternalServicesEnabled());
         TypedQuery<Rental> query = em.createNamedQuery("Rental.getAll", Rental.class);
 
         return query.getResultList();

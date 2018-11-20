@@ -14,30 +14,30 @@ kumuluzee:
     password: postgres
     max-pool-size: 20
 
-    config:
-      etcd:
-        hosts: http://localhost:2379
+  config:
+    etcd:
+      hosts: http://localhost:2379
 
-    discovery:
-      etcd:
-        hosts: http://localhost:2379
+  discovery:
+    etcd:
+      hosts: http://localhost:2379
 
-    health:
-      logs:
-        enabled: true
-        level: FINE
-        period-s: 1
-      servlet:
-        mapping: /health
-        enabled: true
-      checks:
-        data-source-health-check:
-          jndi-name: jdbc/BikeshareRentalDS
-        etcd-health-check:
-          connection-url: http://localhost:2379/health
+  health:
+    logs:
+      enabled: true
+      level: FINE
+      period-s: 1
+    servlet:
+      mapping: /health
+      enabled: true
+    checks:
+      data-source-health-check:
+        jndi-name: jdbc/BikeshareRentalDS
+      etcd-health-check:
+        connection-url: http://localhost:2379/health
 
-  app-properties:
-    external-services:
-      enabled: false
-    rest-config:
-      string-property: value
+app-properties:
+  external-services:
+    enabled: false
+  rest-config:
+    string-property: value
