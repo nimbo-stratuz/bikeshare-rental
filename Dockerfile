@@ -6,4 +6,4 @@ WORKDIR /app
 
 ADD ./api/target/bikeshare-rental-api-1.0.0-SNAPSHOT.jar /app/app.jar
 
-CMD java -jar app.jar
+CMD ["java", "-jar", "app.jar"]
