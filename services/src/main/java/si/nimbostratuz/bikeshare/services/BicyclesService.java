@@ -43,7 +43,7 @@ public class BicyclesService {
 
         } catch (WebApplicationException | ProcessingException e) {
             log.severe(e.getMessage());
-            throw new InternalServerErrorException("bikeshare-catalogue not available");
+            throw new ServiceUnavailableException("bikeshare-catalogue not available");
         }
     }
 }
