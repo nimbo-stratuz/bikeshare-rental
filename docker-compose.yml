@@ -5,12 +5,14 @@ services:
   bikeshare-rental.db:
     image: postgres:alpine
     restart: always
+    ports:
+    - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: bikeshare-rental
-    networks:
-    - bikeshare
+#    networks:
+#    - bikeshare
 
   bikeshare-rental.service:
     build: .
@@ -20,13 +22,11 @@ services:
     environment:
       KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-rental.db:5432/bikeshare-rental
       KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
-      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
-      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd.bikeshare:2379/health
     depends_on:
     - bikeshare-rental.db
     - etcd
-    networks:
-    - bikeshare
+#    networks:
+#    - bikeshare
 
   etcd:
     image: quay.io/coreos/etcd
@@ -41,9 +41,8 @@ services:
       -listen-peer-urls http://0.0.0.0:2380
       -initial-cluster node1=http://etcd:2380
       -cors="*"
-    networks:
-    - bikeshare
-
-networks:
-  bikeshare:
-
+#    networks:
+#    - bikeshare
+#
+#networks:
+#  bikeshare:
