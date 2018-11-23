@@ -1,40 +1,49 @@
 package si.nimbostratuz.bikeshare.services;
 
+import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import lombok.extern.java.Log;
 import si.nimbostratuz.bikeshare.models.dtos.BicycleDTO;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import java.util.List;
 
 @Log
 @ApplicationScoped
 public class BicyclesService {
 
-    private Client httpClient;
+    @Inject
+    @DiscoverService("bikeshare-catalogue")
+    private WebTarget catalogueWebTarget;
 
-    // @Inject
-    // @DiscoverService("bikeshare-catalogue")
-    // private Optional<String> catalogueBaseUrl;
+    public List<BicycleDTO> getAll() {
+        try {
+            return catalogueWebTarget.path("v1")
+                                     .path("bicycles")
+                                     .request().get(new GenericType<List<BicycleDTO>>() {});
 
-    private String catalogueBaseUrl = "http://localhost:8080";
-
-    private void init() {
-        this.httpClient = ClientBuilder.newClient();
+        } catch (WebApplicationException | ProcessingException e) {
+            log.severe(e.getMessage());
+            throw new ServiceUnavailableException("bikeshare-catalogue not available");
+        }
     }
 
     public BicycleDTO getBicycle(Integer id) {
         try {
-            return httpClient.target(catalogueBaseUrl + "/v1/bicycles/" + id.toString())
-                             .request().get(new GenericType<BicycleDTO>() {
-                    });
+            return catalogueWebTarget.path("v1")
+                                     .path("bicycles")
+                                     .path(id.toString())
+                                     .request().get(new GenericType<BicycleDTO>() {});
+
         } catch (WebApplicationException | ProcessingException e) {
             log.severe(e.getMessage());
-            throw new InternalServerErrorException();
+            throw new ServiceUnavailableException("bikeshare-catalogue not available");
         }
     }
 }
