@@ -29,7 +29,7 @@ spec:
 
         # Database
         - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
-          value: jdbc:postgresql://bikeshare-db.cqrqxvxpr2n8.us-east-2.rds.amazonaws.com:5432/bikeshare-rentals
+          value: jdbc:postgresql://bikeshare-db.cqrqxvxpr2n8.us-east-2.rds.amazonaws.com:5432/bikeshare-rental
         - name: KUMULUZEE_DATASOURCES0_USERNAME
           valueFrom:
             secretKeyRef:
@@ -67,6 +67,6 @@ spec:
   type: NodePort
   ports:
   - port: 8081
-    nodePort: 31337
+    nodePort: 30420
   selector:
     app: bikeshare-rental
