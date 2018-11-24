@@ -2,7 +2,7 @@ package si.nimbostratuz.bikeshare.models.dtos;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Data
 public class BicycleDTO {
@@ -15,7 +15,7 @@ public class BicycleDTO {
 
     private Boolean available;
 
-    private Date dateAdded;
+    private Instant dateAdded;
 
     private Integer ownerId;
 }
