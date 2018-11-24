@@ -46,12 +46,12 @@ spec:
           name: server
           protocol: TCP
 
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: server
-          initialDelaySeconds: 20
-          periodSeconds: 3
+#        livenessProbe:
+#          httpGet:
+#            path: /health
+#            port: server
+#          initialDelaySeconds: 20
+#          periodSeconds: 3
 
 
 ---
