@@ -13,7 +13,7 @@ spec:
         app: bikeshare-rental
     spec:
       containers:
-      - image: nimbostratuz/bikeshare-rental:0.5 # TODO 0.6 after everything is done
+      - image: nimbostratuz/bikeshare-rental:0.6
         name: bikeshare-rental
         env:
         - name: KUMULUZEE_DISCOVERY_CLUSTER
@@ -25,7 +25,7 @@ spec:
         - name: KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL
           value: http://etcd:2379/health
         - name: KUMULUZEE_SERVER_BASEURL
-          value: http://159.122.186.143:31337
+          value: http://159.122.186.143:30420
 
         # Database
         - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
