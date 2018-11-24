@@ -10,7 +10,7 @@ public abstract class EntityBean<T> {
     @Inject
     protected EntityManager em;
 
-    public abstract List<T> getAll();
+//    public abstract List<T> getAll();
 
     public abstract T get(Integer id);
 

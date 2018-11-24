@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bikeshare-rental-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bikeshare-rental
+  template:
+    metadata:
+      labels:
+        app: bikeshare-rental
+    spec:
+      containers:
+      - image: nimbostratuz/bikeshare-rental:0.6
+        name: bikeshare-rental
+        env:
+        - name: KUMULUZEE_DISCOVERY_CLUSTER
+          value: ibmcloud
+        - name: KUMULUZEE_DISCOVERY_ETCD_HOSTS
+          value: http://etcd:2379
+        - name: KUMULUZEE_CONFIG_ETCD_HOSTS
+          value: http://etcd:2379
+        - name: KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL
+          value: http://etcd:2379/health
+        - name: KUMULUZEE_SERVER_BASEURL
+          value: http://159.122.186.143:30420
+
+        # Database
+        - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
+          value: jdbc:postgresql://bikeshare-db.cqrqxvxpr2n8.us-east-2.rds.amazonaws.com:5432/bikeshare-rental
+        - name: KUMULUZEE_DATASOURCES0_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: pg-user
+        - name: KUMULUZEE_DATASOURCES0_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: pg-password
+
+        ports:
+        - containerPort: 8080
+          name: server
+          protocol: TCP
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: server
+          initialDelaySeconds: 20
+          periodSeconds: 3
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: bikeshare-rental
+  labels:
+    app: bikeshare-rental
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    nodePort: 30420
+  selector:
+    app: bikeshare-rental
