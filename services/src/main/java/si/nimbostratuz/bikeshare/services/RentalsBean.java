@@ -118,8 +118,10 @@ public class RentalsBean extends EntityBean<Rental> {
 
         try {
             beginTx();
+            //TODO check if date is ok
             rental.setRentStart(Date.from(Instant.now()));
             rental.setRentEnd(null);
+            rental.setEndLocation(null);
             rental.setUserId(rentalDTO.getUserId());
 
             Integer bicycleId = rentalDTO.getBicycleId();
@@ -128,6 +130,8 @@ public class RentalsBean extends EntityBean<Rental> {
             BicycleDTO targetedBicycle = catalogueWebTarget.path("v1")
                     .path("bicycles").path(Integer.toString(bicycleId))
                     .request().get().readEntity(BicycleDTO.class);
+
+            log.info(targetedBicycle.toString());
             if (targetedBicycle.getAvailable()) {
                 // Make targeted Bicycle unavailable
                 targetedBicycle.setAvailable(false);
@@ -142,8 +146,6 @@ public class RentalsBean extends EntityBean<Rental> {
             } else {
                 throw new Exception("Targeted bicycle not available.") ;
             }
-
-            rental.setEndLocation(null);
             commitTx();
         } catch (Exception e) {
             log.info(e.toString());

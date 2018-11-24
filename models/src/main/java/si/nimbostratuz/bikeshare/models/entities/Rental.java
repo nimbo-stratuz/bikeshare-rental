@@ -21,7 +21,7 @@ public class Rental {
     @Temporal(TemporalType.TIMESTAMP)
     private Date rentStart;
 
-    @Column(name = "rent_end", nullable = false)
+    @Column(name = "rent_end")
     @Temporal(TemporalType.TIMESTAMP)
     private Date rentEnd;
 
