@@ -28,7 +28,7 @@
 
         <lombok.version>1.16.22</lombok.version>
         <kumuluzee-config.version>1.1.0</kumuluzee-config.version>
-        <kumuluzee-health.version>1.0.0</kumuluzee-health.version>
+        <kumuluzee-health.version>1.0.1</kumuluzee-health.version>
         <kumuluzee-discovery.version>1.2.0-SNAPSHOT</kumuluzee-discovery.version>
         <kumuluzee-metrics.version>1.1.1</kumuluzee-metrics.version>
 
