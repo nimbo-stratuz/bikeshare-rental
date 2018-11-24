@@ -18,6 +18,25 @@ kumuluzee:
     etcd:
       hosts: http://localhost:2379
 
+  discovery:
+    etcd:
+      hosts: http://localhost:2379
+
+  health:
+    logs:
+      enabled: true
+      level: FINE
+      period-s: 1
+    servlet:
+      mapping: /health
+      enabled: true
+    checks:
+      data-source-health-check:
+        jndi-name: jdbc/BikeshareRentalDS
+      etcd-health-check:
+        connection-url: http://localhost:2379/health
+
+
 app-properties:
   external-services:
     enabled: false

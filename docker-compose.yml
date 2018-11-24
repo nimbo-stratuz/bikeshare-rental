@@ -6,7 +6,7 @@ services:
     image: postgres:alpine
     restart: always
     ports:
-    - 5432:5432
+    - 5433:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -20,8 +20,11 @@ services:
 #       left is outside, right is inside container
     - 8081:8080
     environment:
+      KUMULUZEE_SERVER_BASEURL: http://bikeshare-rental.service:8080
       KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-rental.db:5432/bikeshare-rental
       KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd:2379/health
     depends_on:
     - bikeshare-rental.db
     - etcd
@@ -43,6 +46,32 @@ services:
       -cors="*"
 #    networks:
 #    - bikeshare
+
+
+  #Bikeshare catalogue
+  bikeshare-catalogue.db:
+    image: postgres:alpine
+    restart: always
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bikeshare-catalogue
+
+  bikeshare-catalogue.service:
+    build: ../bikeshare-catalogue
+    ports:
+    - 8080:8080
+    environment:
+      KUMULUZEE_SERVER_BASEURL: http://bikeshare-catalogue.service:8080
+      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-catalogue.db:5432/bikeshare-catalogue
+      KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd:2379/health
+    depends_on:
+    - bikeshare-catalogue.db
+    - etcd
 #
 #networks:
 #  bikeshare:
