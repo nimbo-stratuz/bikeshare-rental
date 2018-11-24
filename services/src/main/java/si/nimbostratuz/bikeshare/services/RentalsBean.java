@@ -120,6 +120,7 @@ public class RentalsBean extends EntityBean<Rental> {
             beginTx();
             rental.setRentStart(Date.from(Instant.now()));
             rental.setRentEnd(null);
+            rental.setUserId(rentalDTO.getUserId());
 
             Integer bicycleId = rentalDTO.getBicycleId();
             // Check if bicycle exists and is free (bikeshare-catalogue)
@@ -130,6 +131,7 @@ public class RentalsBean extends EntityBean<Rental> {
             if (targetedBicycle.getAvailable()) {
                 // Make targeted Bicycle unavailable
                 targetedBicycle.setAvailable(false);
+                rental.setStartLocation(targetedBicycle.getLocation());
 
                 catalogueWebTarget.path("v1")
                         .path("bicycles")
@@ -141,7 +143,6 @@ public class RentalsBean extends EntityBean<Rental> {
                 throw new Exception("Targeted bicycle not available.") ;
             }
 
-            rental.setStartLocation(targetedBicycle.getLocation());
             rental.setEndLocation(null);
             commitTx();
         } catch (Exception e) {

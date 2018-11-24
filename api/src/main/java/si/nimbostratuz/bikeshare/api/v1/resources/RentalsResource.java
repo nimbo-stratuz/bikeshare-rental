@@ -1,6 +1,7 @@
 package si.nimbostratuz.bikeshare.api.v1.resources;
 
 import com.kumuluz.ee.rest.beans.QueryParameters;
+import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
 import si.nimbostratuz.bikeshare.services.RentalsBean;
 
@@ -61,5 +62,12 @@ public class RentalsResource {
         rentalsBean.delete(id);
 
         return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+
+    @POST
+    @Path("rent")
+    public Response rentABicycle(RentalDTO rentalDTO) {
+        return Response.ok(rentalsBean.rentABicycle(rentalDTO)).build();
     }
 }
