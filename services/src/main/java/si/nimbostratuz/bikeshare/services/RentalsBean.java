@@ -1,8 +1,10 @@
 package si.nimbostratuz.bikeshare.services;
 
+import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import com.kumuluz.ee.rest.beans.QueryParameters;
 import com.kumuluz.ee.rest.utils.JPAUtils;
 import lombok.extern.java.Log;
+import si.nimbostratuz.bikeshare.models.dtos.BicycleDTO;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
 import si.nimbostratuz.bikeshare.services.configuration.AppProperties;
@@ -12,6 +14,10 @@ import javax.inject.Inject;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -23,10 +29,13 @@ public class RentalsBean extends EntityBean<Rental> {
 
     @Inject
     private AppProperties appProperties;
+    @Inject
+    @DiscoverService("bikeshare-catalogue")
+    private WebTarget catalogueWebTarget;
+
 
     public List<Rental> getAll(QueryParameters query) {
         log.info("external services enabled: " + appProperties.isExternalServicesEnabled());
-
         List<Rental> rentals = JPAUtils.queryEntities(em, Rental.class, query);
         return rentals;
     }
@@ -105,19 +114,42 @@ public class RentalsBean extends EntityBean<Rental> {
     }
 
     public Rental rentABicycle(RentalDTO rentalDTO) {
-
         Rental rental = new Rental();
 
-        rental.setRentStart(Date.from(Instant.now()));
-        rental.setRentEnd(null);
+        try {
+            beginTx();
+            rental.setRentStart(Date.from(Instant.now()));
+            rental.setRentEnd(null);
 
-        Integer bicycleId = rentalDTO.getBicycleId();
-        // TODO: Check if bicycle exists and is free (bikeshare-catalogue)
-        rental.setBicycleId(bicycleId);
+            Integer bicycleId = rentalDTO.getBicycleId();
+            // Check if bicycle exists and is free (bikeshare-catalogue)
+            // Get targeted Bicycle from bikeshare-catalogue
+            BicycleDTO targetedBicycle = catalogueWebTarget.path("v1")
+                    .path("bicycles").path(Integer.toString(bicycleId))
+                    .request().get().readEntity(BicycleDTO.class);
+            if (targetedBicycle.getAvailable()) {
+                // Make targeted Bicycle unavailable
+                targetedBicycle.setAvailable(false);
 
-        // TODO: use bicycle's location
-        rental.setStartLocation(rentalDTO.getStartLocation());
-        rental.setEndLocation(null);
+                catalogueWebTarget.path("v1")
+                        .path("bicycles")
+                        .path(Integer.toString(bicycleId))
+                        .request().put(Entity.entity(targetedBicycle, MediaType.APPLICATION_JSON));
+
+                rental.setBicycleId(bicycleId);
+            } else {
+                throw new Exception("Targeted bicycle not available.") ;
+            }
+
+            rental.setStartLocation(targetedBicycle.getLocation());
+            rental.setEndLocation(null);
+            commitTx();
+        } catch (Exception e) {
+            log.info(e.toString());
+            rollbackTx();
+
+        }
+
 
         return this.create(rental);
     }
@@ -125,11 +157,30 @@ public class RentalsBean extends EntityBean<Rental> {
     public Rental finalizeRental(Integer rentalId, RentalDTO rentalDTO) {
 
         Rental rental = this.get(rentalId);
+        try {
+            beginTx();
+            rental.setRentEnd(Date.from(Instant.now()));
 
-        rental.setRentEnd(Date.from(Instant.now()));
+            // Get bicycle's location
+            BicycleDTO targetedBicycle = catalogueWebTarget.path("v1")
+                    .path("bicycles").path(Integer.toString(rentalDTO.getBicycleId()))
+                    .request().get().readEntity(BicycleDTO.class);
 
-        // TODO: Get bicycle's location
-        rental.setEndLocation(rentalDTO.getEndLocation());
+            // Make the targetBicycle available again
+            targetedBicycle.setAvailable(true);
+            catalogueWebTarget.path("v1")
+                    .path("bicycles")
+                    .path(Integer.toString(rentalDTO.getBicycleId()))
+                    .request().put(Entity.entity(targetedBicycle, MediaType.APPLICATION_JSON));
+
+
+            // Set end location on rental
+            rental.setEndLocation(targetedBicycle.getLocation());
+            commitTx();
+        } catch (Exception e) {
+            log.info(e.toString());
+            rollbackTx();
+        }
 
         return this.update(rentalId, rental);
     }
