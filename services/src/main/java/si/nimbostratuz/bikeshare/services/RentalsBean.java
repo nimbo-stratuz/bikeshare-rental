@@ -1,5 +1,7 @@
 package si.nimbostratuz.bikeshare.services;
 
+import com.kumuluz.ee.rest.beans.QueryParameters;
+import com.kumuluz.ee.rest.utils.JPAUtils;
 import lombok.extern.java.Log;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
@@ -22,11 +24,21 @@ public class RentalsBean extends EntityBean<Rental> {
     @Inject
     private AppProperties appProperties;
 
-    public List<Rental> getAll() {
+    public List<Rental> getAll(QueryParameters query) {
         log.info("external services enabled: " + appProperties.isExternalServicesEnabled());
-        TypedQuery<Rental> query = em.createNamedQuery("Rental.getAll", Rental.class);
 
-        return query.getResultList();
+        List<Rental> rentals = JPAUtils.queryEntities(em, Rental.class, query);
+        return rentals;
+    }
+
+    /**
+     *
+     * @param query Query Parameter
+     * @return  Returns total amount (type: long) of Rentals in the database
+     */
+    public long getCount(QueryParameters query) {
+        Long amount = JPAUtils.queryEntitiesCount(em, Rental.class, query);
+        return amount;
     }
 
     public Rental get(Integer rentalId) {

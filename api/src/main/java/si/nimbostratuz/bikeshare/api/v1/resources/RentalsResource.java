@@ -1,13 +1,17 @@
 package si.nimbostratuz.bikeshare.api.v1.resources;
 
+import com.kumuluz.ee.rest.beans.QueryParameters;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
 import si.nimbostratuz.bikeshare.services.RentalsBean;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 @ApplicationScoped
 @Path("rentals")
@@ -17,11 +21,17 @@ public class RentalsResource {
 
     @Inject
     private RentalsBean rentalsBean;
+    @Context
+    protected UriInfo uriInfo;
 
     @GET
     public Response getRentals() {
+        QueryParameters query = QueryParameters.query(uriInfo.getRequestUri().getQuery()).build();
 
-        return Response.ok(rentalsBean.getAll()).build();
+        List<Rental> rentals = rentalsBean.getAll(query);
+        Long rentalsAmount = rentalsBean.getCount(query);
+
+        return Response.ok(rentals).header("X-Total-Count", rentalsAmount).build();
     }
 
     @GET
