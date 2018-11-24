@@ -16,7 +16,7 @@ cache:
 env:
   global:
   - DOCKER_IMAGE=nimbostratuz/bikeshare-rental
-  - IMAGE_VERSION=0.5
+  - IMAGE_VERSION=0.6
 
 script:
 - mvn clean package -U
