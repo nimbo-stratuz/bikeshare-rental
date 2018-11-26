@@ -15,7 +15,7 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
     @Override
     public Response toResponse(BadRequestException e) {
 
-        ApiStatusDTO apiStatusDTO = new ApiStatusDTO(Response.Status.BAD_REQUEST, e.getMessage());
+        ApiStatusDTO apiStatusDTO = new ApiStatusDTO(e.getResponse().getStatus(), e.getMessage());
 
         return apiStatusDTO.asResponse();
     }
