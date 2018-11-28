@@ -13,7 +13,7 @@ spec:
         app: bikeshare-rental
     spec:
       containers:
-      - image: nimbostratuz/bikeshare-rental:0.9
+      - image: nimbostratuz/bikeshare-rental:0.10
         name: bikeshare-rental
         env:
         - name: KUMULUZEE_DISCOVERY_CLUSTER
