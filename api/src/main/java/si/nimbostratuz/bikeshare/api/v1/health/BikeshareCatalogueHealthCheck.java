@@ -5,6 +5,7 @@ import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+import org.glassfish.jersey.client.ClientProperties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,9 +30,15 @@ public class BikeshareCatalogueHealthCheck implements HealthCheck {
 
         HealthCheckResponseBuilder builder = HealthCheckResponse.named(BikeshareCatalogueHealthCheck.class.getSimpleName());
 
+        log.info("Health check to url " + catalogueWebTarget.getUri().toString());
+
         try {
-            Response response = catalogueWebTarget.path("health").request().head();
-            if (response.getStatus() == 200) {
+            Response response = catalogueWebTarget.path("health")
+                                                  .request()
+                                                  .property(ClientProperties.CONNECT_TIMEOUT, 10000)
+                                                  .property(ClientProperties.READ_TIMEOUT, 10000)
+                                                  .head();
+            if (response.getStatus() >= 200 && response.getStatus() < 300) {
                 return builder.up().build();
             }
         } catch (WebApplicationException | ProcessingException e) {
