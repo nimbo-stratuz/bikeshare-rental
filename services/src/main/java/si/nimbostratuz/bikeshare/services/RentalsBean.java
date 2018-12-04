@@ -4,6 +4,7 @@ import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import com.kumuluz.ee.rest.beans.QueryParameters;
 import com.kumuluz.ee.rest.utils.JPAUtils;
 import lombok.extern.java.Log;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import si.nimbostratuz.bikeshare.models.dtos.BicycleDTO;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
@@ -33,7 +34,7 @@ public class RentalsBean extends EntityBean<Rental> {
     @DiscoverService("bikeshare-catalogue")
     private WebTarget catalogueWebTarget;
 
-
+//    @Timed
     public List<Rental> getAll(QueryParameters query) {
         log.info("external services enabled: " + appProperties.isExternalServicesEnabled());
         List<Rental> rentals = JPAUtils.queryEntities(em, Rental.class, query);
