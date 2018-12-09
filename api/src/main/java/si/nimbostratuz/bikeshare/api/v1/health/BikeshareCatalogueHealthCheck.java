@@ -9,6 +9,7 @@ import org.glassfish.jersey.client.ClientProperties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.WebTarget;
@@ -23,12 +24,14 @@ public class BikeshareCatalogueHealthCheck implements HealthCheck {
 
     @Inject
     @DiscoverService("bikeshare-catalogue")
-    private WebTarget catalogueWebTarget;
+    private Provider<WebTarget> catalogueWebTargetProvider;
 
     @Override
     public HealthCheckResponse call() {
 
         HealthCheckResponseBuilder builder = HealthCheckResponse.named(BikeshareCatalogueHealthCheck.class.getSimpleName());
+
+        WebTarget catalogueWebTarget = catalogueWebTargetProvider.get();
 
         log.info("Health check to url " + catalogueWebTarget.getUri().toString());
 
