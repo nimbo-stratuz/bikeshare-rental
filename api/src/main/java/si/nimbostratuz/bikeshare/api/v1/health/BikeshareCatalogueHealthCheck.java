@@ -7,7 +7,7 @@ import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
 
 @Health
-@RequestScoped
+@ApplicationScoped
 public class BikeshareCatalogueHealthCheck implements HealthCheck {
 
     private Logger log = Logger.getLogger(BikeshareCatalogueHealthCheck.class.getName());
