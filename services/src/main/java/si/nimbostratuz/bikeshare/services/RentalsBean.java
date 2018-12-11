@@ -120,6 +120,7 @@ public class RentalsBean extends EntityBean<Rental> {
         try {
             beginTx();
             //TODO check if date is ok
+            // TODO set a date
             rental.setRentStart(Date.from(Instant.now()));
             rental.setRentEnd(null);
             rental.setEndLocation(null);
@@ -145,17 +146,18 @@ public class RentalsBean extends EntityBean<Rental> {
 
                 rental.setBicycleId(bicycleId);
             } else {
-                throw new Exception("Targeted bicycle not available.") ;
+                throw new BadRequestException("Targeted bicycle not available.") ;
             }
             commitTx();
+            return this.create(rental);
         } catch (Exception e) {
             log.info(e.toString());
             rollbackTx();
-
+            throw new BadRequestException("Bicycle rental failed.");
         }
 
 
-        return this.create(rental);
+
     }
 
     public Rental finalizeRental(Integer rentalId, RentalDTO rentalDTO) {
@@ -181,12 +183,14 @@ public class RentalsBean extends EntityBean<Rental> {
             // Set end location on rental
             rental.setEndLocation(targetedBicycle.getLocation());
             commitTx();
+            return this.update(rentalId, rental);
         } catch (Exception e) {
             log.info(e.toString());
             rollbackTx();
+            throw new BadRequestException("Rental finalization failed.");
         }
 
-        return this.update(rentalId, rental);
+
     }
 
 }

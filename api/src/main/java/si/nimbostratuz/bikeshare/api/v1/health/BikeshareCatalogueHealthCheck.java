@@ -30,7 +30,7 @@ public class BikeshareCatalogueHealthCheck implements HealthCheck {
 
         HealthCheckResponseBuilder builder = HealthCheckResponse.named(BikeshareCatalogueHealthCheck.class.getSimpleName());
 
-        log.info("Health check to url " + catalogueWebTarget.getUri().toString());
+//        log.info("Health check to url " + catalogueWebTarget.getUri().toString());
 
         try {
             Response response = catalogueWebTarget.path("health")

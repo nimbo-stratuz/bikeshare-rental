@@ -70,4 +70,12 @@ public class RentalsResource {
     public Response rentABicycle(RentalDTO rentalDTO) {
         return Response.ok(rentalsBean.rentABicycle(rentalDTO)).build();
     }
+
+    @POST
+    @Path("{id}/finalize")
+    public Response finalizeRent(@PathParam("id") Integer rentalId, RentalDTO rentalDTO) {
+        return Response.ok(rentalsBean.finalizeRental(rentalId, rentalDTO)).build();
+
+    }
+
 }

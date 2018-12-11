@@ -45,6 +45,6 @@ kumuluzee:
 
 app-properties:
   external-services:
-    enabled: false
+    enabled: true
   rest-config:
     string-property: value
