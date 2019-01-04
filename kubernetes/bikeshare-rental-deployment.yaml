@@ -25,11 +25,11 @@ spec:
         - name: KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL
           value: http://etcd:2379/health
         - name: KUMULUZEE_SERVER_BASEURL
-          value: http://159.122.186.143:30420
+          value: http://159.122.186.200:30420
 
         # Database
         - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
-          value: jdbc:postgresql://bikeshare-db.cqrqxvxpr2n8.us-east-2.rds.amazonaws.com:5432/bikeshare-rental
+          value: jdbc:postgresql://postgres:5432/bikeshare-rental
         - name: KUMULUZEE_DATASOURCES0_USERNAME
           valueFrom:
             secretKeyRef:
