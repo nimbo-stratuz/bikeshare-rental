@@ -6,6 +6,7 @@ import com.kumuluz.ee.rest.utils.JPAUtils;
 import lombok.extern.java.Log;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import si.nimbostratuz.bikeshare.models.dtos.BicycleDTO;
+import si.nimbostratuz.bikeshare.models.dtos.PaymentDTO;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
 import si.nimbostratuz.bikeshare.services.configuration.AppProperties;
@@ -43,6 +44,9 @@ public class RentalsBean extends EntityBean<Rental> {
     @Inject
     @DiscoverService("bikeshare-catalogue")
     private WebTarget catalogueWebTarget;
+    @Inject
+    @DiscoverService("bikeshare-payments")
+    private WebTarget paymentsWebTarget;
 
 //    @Timed
     public List<Rental> getAll(QueryParameters query) {
@@ -200,11 +204,20 @@ public class RentalsBean extends EntityBean<Rental> {
             // Make the targetBicycle available again
             targetedBicycle.setAvailable(true);
 
+            // Make the payment
             BigDecimal totalPrice = calculatePrice(rental.getRentStart(), rental.getRentEnd());
             log.info("Total price for this ride is" + totalPrice.toString());
-            // TODO discover service Payments and make a POST request
-            // TODO get owner ID for payment
-            //targetedBicycle.getOwnerId();
+
+            PaymentDTO payment = new PaymentDTO();
+            // set
+            payment.setAmount(totalPrice);
+            payment.setFromUserId(rentalDTO.getUserId());
+            payment.setToUserId(targetedBicycle.getOwnerId());
+            payment.setRideId(rentalId);
+
+            // Post to payments microservice
+            paymentsWebTarget.path("v1").path("payments").request()
+                    .post(Entity.entity(payment, MediaType.APPLICATION_JSON));
 
             catalogueWebTarget.path("v1")
                     .path("bicycles")

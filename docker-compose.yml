@@ -48,6 +48,31 @@ services:
 #    - bikeshare
 
 
+    #Bikeshare payments
+  bikeshare-payments.db:
+    image: postgres:alpine
+    restart: always
+    ports:
+    - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bikeshare-payments
+
+  bikeshare-payments.service:
+    build: ../bikeshare-payments
+    ports:
+    - 8082:8080
+    environment:
+      KUMULUZEE_SERVER_BASEURL: http://bikeshare-payments.service:8080
+      KUMULUZEE_DATASOURCES0_CONNECTIONURL: jdbc:postgresql://bikeshare-payments.db:5432/bikeshare-payments
+      KUMULUZEE_CONFIG_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_DISCOVERY_ETCD_HOSTS: http://etcd:2379
+      KUMULUZEE_HEALTH_CHECKS_ETCDHEALTHCHECK_CONNECTIONURL: http://etcd:2379/health
+    depends_on:
+    - bikeshare-payments.db
+    - etcd
+
   #Bikeshare catalogue
   bikeshare-catalogue.db:
     image: postgres:alpine
