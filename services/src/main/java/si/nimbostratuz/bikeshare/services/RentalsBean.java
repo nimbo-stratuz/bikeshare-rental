@@ -9,6 +9,7 @@ import si.nimbostratuz.bikeshare.models.dtos.BicycleDTO;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
 import si.nimbostratuz.bikeshare.services.configuration.AppProperties;
+import si.nimbostratuz.bikeshare.services.configuration.PricePerMinute;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,15 +20,24 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Log
 @ApplicationScoped
 public class RentalsBean extends EntityBean<Rental> {
 
 
+    @Inject
+    // Price of rental per minute in double - make sure to use BigDecimal in operations
+    private PricePerMinute pricePerMinute;
     @Inject
     private AppProperties appProperties;
     @Inject
@@ -36,6 +46,7 @@ public class RentalsBean extends EntityBean<Rental> {
 
 //    @Timed
     public List<Rental> getAll(QueryParameters query) {
+        log.info("Current price per minute: " + (pricePerMinute.getBigDecimalPricePerMinute()).toString());
         log.info("external services enabled: " + appProperties.isExternalServicesEnabled());
         List<Rental> rentals = JPAUtils.queryEntities(em, Rental.class, query);
         return rentals;
@@ -119,8 +130,6 @@ public class RentalsBean extends EntityBean<Rental> {
 
         try {
             beginTx();
-            //TODO check if date is ok
-            // TODO set a date
             rental.setRentStart(Date.from(Instant.now()));
             rental.setRentEnd(null);
             rental.setEndLocation(null);
@@ -160,12 +169,28 @@ public class RentalsBean extends EntityBean<Rental> {
 
     }
 
+    private BigDecimal calculatePrice(Date start, Date end) {
+        // Rounded to the minute
+        Long durationInMinutes = TimeUnit.MINUTES.convert(
+                end.getTime() - start.getTime(),
+                TimeUnit.MILLISECONDS);
+
+        log.info("difference in minutes " + durationInMinutes.toString());
+        //
+        BigDecimal duration = new BigDecimal(durationInMinutes);
+        MathContext mc = new MathContext(4);
+
+        return (duration.multiply(pricePerMinute.getBigDecimalPricePerMinute(), mc));
+    }
+
     public Rental finalizeRental(Integer rentalId, RentalDTO rentalDTO) {
 
         Rental rental = this.get(rentalId);
         try {
             beginTx();
             rental.setRentEnd(Date.from(Instant.now()));
+
+
 
             // Get bicycle's location
             BicycleDTO targetedBicycle = catalogueWebTarget.path("v1")
@@ -174,6 +199,13 @@ public class RentalsBean extends EntityBean<Rental> {
 
             // Make the targetBicycle available again
             targetedBicycle.setAvailable(true);
+
+            BigDecimal totalPrice = calculatePrice(rental.getRentStart(), rental.getRentEnd());
+            log.info("Total price for this ride is" + totalPrice.toString());
+            // TODO discover service Payments and make a POST request
+            // TODO get owner ID for payment
+            //targetedBicycle.getOwnerId();
+
             catalogueWebTarget.path("v1")
                     .path("bicycles")
                     .path(Integer.toString(rentalDTO.getBicycleId()))
@@ -189,8 +221,6 @@ public class RentalsBean extends EntityBean<Rental> {
             rollbackTx();
             throw new BadRequestException("Rental finalization failed.");
         }
-
-
     }
 
 }

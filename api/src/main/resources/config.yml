@@ -46,5 +46,6 @@ kumuluzee:
 app-properties:
   external-services:
     enabled: true
+  price-per-minute: "0.10" # Stored here as string, converted to BigDecimal
   rest-config:
     string-property: value
