@@ -8,11 +8,13 @@ import java.math.BigDecimal;
 
 @ApplicationScoped
 @ConfigBundle("app-properties")
-public class PricePerMinute {
+public class Pricing {
     @ConfigValue(value = "price-per-minute", watch = true)
     private String pricePerMinute;
+    @ConfigValue(value = "start-minutes", watch = true)
+    private Integer startMinutes;
 
-
+    public Integer getStartMinutes() {return startMinutes;}
     public String getPricePerMinute() {
         return pricePerMinute;
     }
@@ -26,6 +28,7 @@ public class PricePerMinute {
         return price;
     }
 
+    public void setStartMinutes(Integer startMinutes) { this.startMinutes = startMinutes; }
     public void setPricePerMinute (String pricePerMinute) {
         this.pricePerMinute = pricePerMinute;
     }

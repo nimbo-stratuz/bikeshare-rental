@@ -47,5 +47,6 @@ app-properties:
   external-services:
     enabled: true
   price-per-minute: "0.10" # Stored here as string, converted to BigDecimal
+  start-minutes: 2 # Minutes you pay for when you unlock a bicycle
   rest-config:
     string-property: value

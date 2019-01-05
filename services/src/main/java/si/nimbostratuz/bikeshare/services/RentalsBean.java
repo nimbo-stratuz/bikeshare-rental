@@ -4,29 +4,23 @@ import com.kumuluz.ee.discovery.annotations.DiscoverService;
 import com.kumuluz.ee.rest.beans.QueryParameters;
 import com.kumuluz.ee.rest.utils.JPAUtils;
 import lombok.extern.java.Log;
-import org.eclipse.microprofile.metrics.annotation.Timed;
 import si.nimbostratuz.bikeshare.models.dtos.BicycleDTO;
 import si.nimbostratuz.bikeshare.models.dtos.PaymentDTO;
 import si.nimbostratuz.bikeshare.models.dtos.RentalDTO;
 import si.nimbostratuz.bikeshare.models.entities.Rental;
 import si.nimbostratuz.bikeshare.services.configuration.AppProperties;
-import si.nimbostratuz.bikeshare.services.configuration.PricePerMinute;
+import si.nimbostratuz.bikeshare.services.configuration.Pricing;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.TypedQuery;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +32,7 @@ public class RentalsBean extends EntityBean<Rental> {
 
     @Inject
     // Price of rental per minute in double - make sure to use BigDecimal in operations
-    private PricePerMinute pricePerMinute;
+    private Pricing pricing;
     @Inject
     private AppProperties appProperties;
     @Inject
@@ -50,7 +44,7 @@ public class RentalsBean extends EntityBean<Rental> {
 
 //    @Timed
     public List<Rental> getAll(QueryParameters query) {
-        log.info("Current price per minute: " + (pricePerMinute.getBigDecimalPricePerMinute()).toString());
+        log.info("Current price per minute: " + (pricing.getBigDecimalPricePerMinute()).toString());
         log.info("external services enabled: " + appProperties.isExternalServicesEnabled());
         List<Rental> rentals = JPAUtils.queryEntities(em, Rental.class, query);
         return rentals;
@@ -178,13 +172,14 @@ public class RentalsBean extends EntityBean<Rental> {
         Long durationInMinutes = TimeUnit.MINUTES.convert(
                 end.getTime() - start.getTime(),
                 TimeUnit.MILLISECONDS);
+        durationInMinutes += pricing.getStartMinutes(); // start minutes are charged upon each rent
 
         log.info("difference in minutes " + durationInMinutes.toString());
         //
         BigDecimal duration = new BigDecimal(durationInMinutes);
         MathContext mc = new MathContext(4);
 
-        return (duration.multiply(pricePerMinute.getBigDecimalPricePerMinute(), mc));
+        return (duration.multiply(pricing.getBigDecimalPricePerMinute(), mc));
     }
 
     public Rental finalizeRental(Integer rentalId, RentalDTO rentalDTO) {
@@ -200,7 +195,10 @@ public class RentalsBean extends EntityBean<Rental> {
             BicycleDTO targetedBicycle = catalogueWebTarget.path("v1")
                     .path("bicycles").path(Integer.toString(rentalDTO.getBicycleId()))
                     .request().get().readEntity(BicycleDTO.class);
-
+            if (targetedBicycle.getAvailable()) {
+                log.info("Error. The bicycle is not rented.");
+                throw new BadRequestException("Bicycle not rented.");
+            }
             // Make the targetBicycle available again
             targetedBicycle.setAvailable(true);
 
@@ -216,8 +214,16 @@ public class RentalsBean extends EntityBean<Rental> {
             payment.setRideId(rentalId);
 
             // Post to payments microservice
-            paymentsWebTarget.path("v1").path("payments").request()
-                    .post(Entity.entity(payment, MediaType.APPLICATION_JSON));
+            try {
+                paymentsWebTarget.path("v1").path("payments").request()
+                        .post(Entity.entity(payment, MediaType.APPLICATION_JSON));
+                log.info("Payment of " + totalPrice.toString() + " € has been made.");
+
+            } catch (Exception e) {
+                log.info(e.toString());
+                rollbackTx();
+                throw new BadRequestException("Payments microservice failed.");
+            }
 
             catalogueWebTarget.path("v1")
                     .path("bicycles")
